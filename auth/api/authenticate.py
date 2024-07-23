@@ -1,60 +1,25 @@
-import requests
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from gotrue.types import AuthResponse
 from gotrue.errors import AuthApiError
 
-from auth.services.supabase import supabase
-from auth.settings import SUPABASE_URL, SUPABASE_KEY
 from auth.api.router import AuthRouter
 from auth.schemas.auth import LoginRequest, LoginResponse
 from auth.schemas.auth import TokenValidateRequest, TokenValidateResponse
 from auth.schemas.auth import LogoutRequest, LogoutResponse
 from auth.schemas.auth import SignUpRequest, SignUpResponse
-
 from auth.schemas.user import UserCreate
-
 from auth.managers.user import users_manager
-
 from auth.api.deps.db import get_db
+
+from auth.domains.authenticate import _login
+from auth.domains.authenticate import _logout
+from auth.domains.authenticate import _validate_token
+from auth.domains.authenticate import _sign_up
 
 authenticate_router = AuthRouter()
 
-async def _login(email: str, password: str):
-    response: AuthResponse = supabase.auth.sign_in_with_password({ "email": email, "password": password })
-    return response.session.access_token, response.user.id
-
-
-async def _logout(token: str) -> bool:
-    url = f"{SUPABASE_URL}/auth/v1/logout"
-
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    response = requests.post(url, headers=headers)
-    print(response)
-    if response.status_code != 200:
-        return False
-    return True
-
-async def _validate_token(access_token: str) -> bool:
-    response = supabase.auth.get_user(access_token)
-    return response.user.aud == 'authenticated'
-
-async def _sign_up(email: str, password: str):
-    response = supabase.auth.sign_up(
-        credentials={"email": f"{email}", "password": "{password}"}
-    )
-    if response.user.id:
-        return response.user.id
-
     
-
-
 @authenticate_router.post("/login", response_model=LoginResponse)
 async def login(
     request: LoginRequest,

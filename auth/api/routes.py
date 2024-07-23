@@ -1,12 +1,11 @@
-from fastapi import Request
 from fastapi import APIRouter
 
 from auth.api.router import AuthRouter
 
-# from core_api.api.sources import sources_router
-# from core_api.api.users import users_router
 from auth.api.authenticate import authenticate_router
 from auth.api.team import team_router
+from auth.api.organization import organization_router
+from auth.api.worlflow import workflow_router
 
 
 root_router: APIRouter = AuthRouter()
@@ -18,5 +17,5 @@ def health_check() -> int:
 
 root_router.include_router(authenticate_router)
 root_router.include_router(team_router, prefix="/team")
-# root_router.include_router(sources_router, prefix="/v1/sources")
-# root_router.include_router(users_router, prefix="/v1/users")
+root_router.include_router(organization_router, prefix="/organization")
+root_router.include_router(workflow_router, prefix="/workflow")
