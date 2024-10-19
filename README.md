@@ -1,4 +1,4 @@
-# stackai-auth-poc
+# auth-api
 what's the password?
 
 ### API
